@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Case, Activity, Variant, Bill, Rework
+from .models import Case, Activity, Variant, Inventory, OrderItem
 
 class CaseSerializer(serializers.ModelSerializer):
     """
@@ -29,7 +29,7 @@ class ActivitySerializer(serializers.ModelSerializer):
     """
     class Meta:
         model = Activity
-        fields =  ['id','case', 'timestamp', 'name', 'case_index', 'tpt']	
+        fields =  '__all__'	
 
 class VariantSerializer(serializers.ModelSerializer):
     """
@@ -46,38 +46,37 @@ class VariantSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Variant
-        fields = ['id', 'activities', 'cases', 'number_cases', 'percentage', 'avg_time']
-        
-class BillSerializer(serializers.ModelSerializer):
+        fields = '__all__'
+
+class InventorySerializer(serializers.ModelSerializer):
     """
-    Serializer for the Bill model.
-
-    This serializer converts Bill instances to native Python datatypes
-    that can be easily rendered into JSON, XML or other content types.
-
-    Meta:
-        model (Bill): The model to be serialized.
-        fields (list): The fields of the model to be serialized.
+    Serializer for the Inventory model.
+    This serializer converts Inventory model instances into JSON format and vice versa.
+    It includes the following fields:
+    - id: The unique identifier for the inventory item.
+    - product_code: The code identifying the product.
+    - product_name: The name of the product.
+    - current_stock: The current stock level of the product.
+    - unit_price: The price per unit of the product.
     """
-    case = CaseSerializer()
-
     class Meta:
-        model = Bill
-        fields = ['id', 'case', 'timestamp', 'value']
+        model = Inventory
+        fields = '__all__'
 
-class ReworkSerializer(serializers.ModelSerializer):
+class OrderItemSerializer(serializers.ModelSerializer):
     """
-    Serializer for the Rework model.
-
-    This serializer converts Rework instances to native Python datatypes.
+    Serializer for the OrderItem model.
+    This serializer converts OrderItem model instances into JSON format and vice versa.
+    It includes the following fields:
+    - id: The unique identifier for the order item.
+    - order: The order associated with the order item.
+    - material: The material associated with the order item.
+    - quantity: The quantity of the material in the order item.
+    - unit_price: The unit price of the material in the order item.
+    - total_price: The total price of the order item.
+    - suggestion: The suggested inventory item for the order item.
+    - confidence: The confidence level of the suggestion.
     """
-    activity = ActivitySerializer()
-    case = serializers.SerializerMethodField()
-
-    def get_case(self, obj):
-        return CaseSerializer(obj.activity.case).data
-
     class Meta:
-        model = Rework
-        fields = ['id', 'activity', 'case', 'cost', 'target', 'cause']
-
+        model = OrderItem
+        fields = '__all__'

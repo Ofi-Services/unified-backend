@@ -1,38 +1,11 @@
 from rest_framework import generics
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from .models import Case, Activity, Variant, Bill, Rework
-from .serializers import CaseSerializer, ActivitySerializer, VariantSerializer, BillSerializer, ReworkSerializer
+from .models import Case, Activity, Variant, Inventory, OrderItem
+from .serializers import CaseSerializer, ActivitySerializer, VariantSerializer
 from rest_framework.pagination import PageNumberPagination
 from datetime import datetime
 
-
-class CaseListCreate(generics.ListCreateAPIView):
-    """
-    API view to retrieve list of cases or create new.
-    """
-    queryset = Case.objects.all()
-    serializer_class = CaseSerializer
-    pagination_class = PageNumberPagination
-
-    def get_queryset(self):
-        """
-        Optionally restricts the returned cases to a given page size,
-        by filtering against a `page_size` query parameter in the URL.
-        """
-        queryset = super().get_queryset()
-        page_size = self.request.query_params.get('page_size')
-        if page_size:
-            self.pagination_class.page_size = int(page_size)
-        return queryset
-
-# View for listing and creating Activity objects
-class activityListCreate(generics.ListCreateAPIView):
-    """
-    API view to retrieve list of activities or create new.
-    """
-    queryset = Activity.objects.all()
-    serializer_class = ActivitySerializer
 
 
 # Custom view for listing Activity objects with optional filtering and pagination
@@ -246,127 +219,6 @@ class VariantList(APIView):
         serializer = VariantSerializer(paginated_variants, many=True)
         return paginator.get_paginated_response(serializer.data)
 
-class BillList(APIView):
-    """
-    BillList APIView
-    This view handles GET requests to list all Bill objects with optional filtering 
-    by start and end dates. It supports pagination and validates the date format 
-    for filtering.
-    Methods:
-        get(request, format=None):
-            Handles GET requests to retrieve a paginated list of Bill objects. 
-            Allows filtering by `start_date` and `end_date` query parameters in 
-            the format 'YYYY-MM-DD'. Returns a paginated response with serialized 
-            Bill data.
-    Query Parameters:
-        - page_size (int, optional): Number of items per page. Defaults to 100000.
-        - start_date (str, optional): Filter bills with a timestamp greater than 
-          or equal to this date (format: 'YYYY-MM-DD').
-        - end_date (str, optional): Filter bills with a timestamp less than or 
-          equal to this date (format: 'YYYY-MM-DD').
-    Responses:
-        - 200 OK: Returns a paginated list of serialized Bill objects.
-        - 400 Bad Request: Returned if the date format is invalid.
-        - 500 Internal Server Error: Returned if an unexpected error occurs.
-    """
-
-    def get(self, request, format=None):
-        """
-        Query Parameters:
-            - page_size (int, optional): Number of bills per page. Defaults to 100000.
-            - start_date (str, optional): Filter bills with a timestamp greater than or equal to this date (format: YYYY-MM-DD).
-            - end_date (str, optional): Filter bills with a timestamp less than or equal to this date (format: YYYY-MM-DD).
-        Returns:
-            - 200 OK: A paginated list of bills serialized as JSON.
-            - 400 Bad Request: If the date format is invalid.
-            - 500 Internal Server Error: If an unexpected error occurs.
-        
-        Handle GET request to list all Bills with optional filtering by start and end dates.
-        """
-        try:
-            page_size = request.query_params.get('page_size', 100000)
-            start_date = request.query_params.get('start_date')
-            end_date = request.query_params.get('end_date')
-
-            # Validate date format
-            try:
-                if start_date:
-                    start_date = datetime.strptime(start_date, "%Y-%m-%d")
-                if end_date:
-                    end_date = datetime.strptime(end_date, "%Y-%m-%d")
-            except ValueError:
-                return Response({'error': 'Invalid date format. Use YYYY-MM-DD.'}, status=400)
-
-            bills = Bill.objects.all()
-            if start_date:
-                bills = bills.filter(timestamp__gte=start_date)
-            if end_date:
-                bills = bills.filter(timestamp__lte=end_date)
-
-            paginator = PageNumberPagination()
-            paginator.page_size = page_size
-            paginated_bills = paginator.paginate_queryset(bills, request)
-            serializer = BillSerializer(paginated_bills, many=True)
-            return paginator.get_paginated_response(serializer.data)
-        except Exception as e:
-            return Response({'error': str(e)}, status=500)
-        
-
-class ReworkList(APIView):
-    """
-    ReworkList APIView handles GET requests to retrieve a paginated list of Rework objects 
-    with optional filtering by start and end dates.
-    Methods:
-        get(request, format=None):
-            Retrieves a list of Rework objects. Supports filtering by start_date and end_date 
-            query parameters in the format 'YYYY-MM-DD'. Results are paginated based on the 
-            page_size query parameter (default is 100,000).
-    Query Parameters:
-        - page_size (int, optional): Number of items per page. Default is 100,000.
-        - start_date (str, optional): Filter results to include only those with activity 
-          timestamps on or after this date. Format: 'YYYY-MM-DD'.
-        - end_date (str, optional): Filter results to include only those with activity 
-          timestamps on or before this date. Format: 'YYYY-MM-DD'.
-    Responses:
-        - 200 OK: Returns a paginated list of serialized Rework objects.
-        - 400 Bad Request: Returned if the date format is invalid.
-        - 500 Internal Server Error: Returned if an unexpected error occurs.
-    Raises:
-        - ValueError: If the provided start_date or end_date is not in the correct format.
-        - Exception: For any other unexpected errors.
-
-    """
-    def get(self, request, format=None):
-        """
-        Handle GET request to list all Reworks with optional filtering by start and end dates.
-        """
-        try:
-            page_size = request.query_params.get('page_size', 100000)
-            startdate = request.query_params.get('start_date')
-            enddate = request.query_params.get('end_date')
-
-            # Validate date format
-            try:
-                if startdate:
-                    startdate = datetime.strptime(startdate, "%Y-%m-%d")
-                if enddate:
-                    enddate = datetime.strptime(enddate, "%Y-%m-%d")
-            except ValueError:
-                return Response({'error': 'Invalid date format. Use YYYY-MM-DD.'}, status=400)
-
-            reworks = Rework.objects.all()
-            if startdate:
-                reworks = reworks.filter(activity__timestamp__gte=startdate)
-            if enddate:
-                reworks = reworks.filter(activity__timestamp__lte=enddate)
-
-            paginator = PageNumberPagination()
-            paginator.page_size = page_size
-            paginated_reworks = paginator.paginate_queryset(reworks, request)
-            serializer = ReworkSerializer(paginated_reworks, many=True)
-            return paginator.get_paginated_response(serializer.data)
-        except Exception as e:
-            return Response({'error': str(e)}, status=500)
         
 class KPIList(APIView):
     """

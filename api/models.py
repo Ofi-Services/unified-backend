@@ -5,19 +5,18 @@ from .constants import ACTIVITY_CHOICES
 class Case(models.Model):
 
     id = models.CharField(max_length=25, primary_key=True)
-    created_at = models.DateTimeField()
-    employee_id = models.CharField(max_length=255)
+    order_date = models.DateTimeField()
+    employee_id = models.CharField(max_length=25)
     branch = models.CharField(max_length=25)
-    value = models.IntegerField(default=0)
     supplier = models.CharField(max_length=100)
-    duration = models.DurationField(null=True, blank=True)
-    open = models.BooleanField(default=True)
+    avg_time = models.FloatField(default=0)
     estimated_delivery = models.DateTimeField(null=True, blank=True)
     delivery = models.DateTimeField(null=True, blank=True)
     on_time = models.BooleanField(default=False)
     in_full = models.BooleanField(default=False)
     number_of_items = models.IntegerField()
     ft_items = models.IntegerField()
+    total_price = models.IntegerField()
 
 
     def __str__(self):
@@ -39,7 +38,6 @@ class Activity(models.Model):
     case = models.ForeignKey(Case, related_name='activities', on_delete=models.CASCADE)
     timestamp = models.DateTimeField()
     name = models.CharField(max_length=25)
-    case_index = models.IntegerField(default=0)
     tpt = models.FloatField(default=0)
     user = models.CharField(max_length=25, default='None')
     user_type = models.CharField(max_length=25, default='None')
@@ -91,7 +89,7 @@ class Inventory(models.Model):
     current_stock = models.IntegerField()
     unit_price = models.IntegerField()
     new_product = models.BooleanField(default=False)
-    
+
     def __str__(self):
         """
         Returns the string representation of the Inventory instance.
