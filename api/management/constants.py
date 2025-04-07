@@ -44,28 +44,6 @@ NAMES = [
     "William", "Willie", "Wyatt", "Xavier", "Yolanda", "Yvonne", "Zachary", "Zoe"
 ]
 
-RAMOS = [
-    "Home Insurance",
-    "Fire Insurance",
-    "Life Insurance",
-    "Health Insurance",
-    "Auto Insurance",
-    "Travel Insurance",
-    "Pet Insurance",
-    "Business Insurance",
-    "Renters Insurance",
-    "Flood Insurance",
-    "Earthquake Insurance",
-    "Disability Insurance",
-    "Liability Insurance",
-    "Workers' Compensation Insurance",
-    "Cyber Insurance",
-    "Marine Insurance",
-    "Aviation Insurance",
-    "Crop Insurance",
-    "Title Insurance",
-    "Burial Insurance"
-]
 
 BRANCHES = [
     "Branch 1",
