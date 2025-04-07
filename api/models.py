@@ -3,45 +3,25 @@ from .constants import ACTIVITY_CHOICES
 
 #The models are the representations of the database tables. They are used to interact with the database.
 class Case(models.Model):
-    """
-    A model representing a case.
 
-    Attributes:
-        id (int): The primary key for the case.
-        insurance (int): The insurance of the case.
-        avg_time (float): The time that took the case to complete.
-        type (str): The type of the case, it can be Issuance, Policy onboarding or Renewal.
-        branch (str): The branch of the case.
-        ramo (str): The type of insurance of the case.
-        brocker (str): The brocker of the insurance.
-        state (str): The final state of the case.
-        client (str): The client of the insurance.
-        creator (str): The creator of the case.
-        value (int): The value of the insurance.
-        approved (bool): The final approval status of the case.
-        insurance_creation (datetime): The timestamp of the insurance creation.
-        insurance_start (datetime): The timestamp of when the insurance coverage starts.
-        insurance_end (datetime): The timestamp of when the insurance coverage ends.
-    """
     id = models.CharField(max_length=25, primary_key=True)
-    insurance = models.IntegerField(default=0)
-    avg_time = models.FloatField(default=0)
-    type = models.CharField(max_length=25, default='None')
-    branch = models.CharField(max_length=25, default='None')
-    ramo = models.CharField(max_length=25, default='None')
-    brocker = models.CharField(max_length=25, default='None')
-    state = models.CharField(max_length=25, default='None')
-    client = models.CharField(max_length=25, default='None')
-    creator = models.CharField(max_length=25, default='None')
+    created_at = models.DateTimeField()
+    employee_id = models.CharField(max_length=255)
+    branch = models.CharField(max_length=25)
     value = models.IntegerField(default=0)
-    approved = models.BooleanField(default=False)
-    insurance_creation = models.DateTimeField()
-    insurance_start = models.DateTimeField()
-    insurance_end = models.DateTimeField()
+    supplier = models.CharField(max_length=100)
+    duration = models.DurationField(null=True, blank=True)
+    open = models.BooleanField(default=True)
+    estimated_delivery = models.DateTimeField(null=True, blank=True)
+    delivery = models.DateTimeField(null=True, blank=True)
+    on_time = models.BooleanField(default=False)
+    in_full = models.BooleanField(default=False)
+    number_of_items = models.IntegerField()
+    ft_items = models.IntegerField()
 
 
     def __str__(self):
-        return f"Case {self.id}"
+        return f"Case {self.id} - Duration: {self.duration}"
 
 class Activity(models.Model):
     """
@@ -61,6 +41,10 @@ class Activity(models.Model):
     name = models.CharField(max_length=25)
     case_index = models.IntegerField(default=0)
     tpt = models.FloatField(default=0)
+    user = models.CharField(max_length=25, default='None')
+    user_type = models.CharField(max_length=25, default='None')
+    automatic = models.BooleanField(default=False)
+    rework = models.BooleanField(default=False)
 
     def __str__(self):
         return f"{self.case.id} - {self.name} at {self.timestamp}"
@@ -88,42 +72,59 @@ class Variant(models.Model):
         return self.name
     
 
-class Bill(models.Model):
+class Inventory(models.Model):
     """
-    A model representing a bill.
-
+    Inventory model represents the inventory of products in the system.
     Attributes:
-        id (int): The primary key for the bill.
-        case (Case): The ID of the related case.
-        timestamp (datetime): The timestamp of the bill.
-        value (int): The value of the bill.
+        id (AutoField): The primary key for the inventory record.
+        product_code (CharField): The code identifying the product. Can be blank or null.
+        product_name (CharField): The name of the product.
+        current_stock (IntegerField): The current stock level of the product.
+        unit_price (IntegerField): The price per unit of the product.
+    Methods:
+        __str__(): Returns the string representation of the Inventory instance, 
+                   which is the product code.
     """
-
     id = models.AutoField(primary_key=True)
-    case = models.ForeignKey(Case, related_name='bills', on_delete=models.CASCADE)
-    timestamp = models.DateTimeField()
-    value = models.IntegerField(default=0)
-
-    def __str__(self):
-        return f"{self.case.id} - {self.value} at {self.timestamp} ({self.payment_frequency})"
+    product_code = models.CharField(max_length=255, blank=True, null=True)
+    product_name = models.CharField(max_length=255)
+    current_stock = models.IntegerField()
+    unit_price = models.IntegerField()
+    new_product = models.BooleanField(default=False)
     
-class Rework(models.Model):
-    """
-    A model representing a rework.
+    def __str__(self):
+        """
+        Returns the string representation of the Inventory instance.
+        """
+        return f'{self.product_code}'
 
+class OrderItem(models.Model):
+    """
+    OrderItem represents an item in an order, including details about the material, quantity, pricing, and related inventory suggestions.
     Attributes:
-        id (int): The primary key for the rework.
-        activity (Activity): The related activity where the rework happened.
-        cost (int): The cost in seconds of the rework.
-        target (str): The target of the return.
-        cause (str): The cause of the return.
+        order (ForeignKey): A reference to the associated Order. Deletes the OrderItem if the Order is deleted.
+        material_name (CharField): The name of the material for the order item. Maximum length is 255 characters.
+        material_code (CharField): An optional code for the material. Maximum length is 255 characters.
+        quantity (IntegerField): The quantity of the material ordered.
+        unit_price (IntegerField): The price per unit of the material.
+        is_free_text (BooleanField): Indicates whether the material is a free-text entry.
+        suggestion (ForeignKey): An optional reference to an Inventory item as a suggestion. Deletes the suggestion if the Inventory item is deleted.
+        confidence (FloatField): An optional confidence score for the suggestion.
+    Methods:
+        __str__(): Returns a string representation of the OrderItem instance, including the material name and quantity.
     """
+    order = models.ForeignKey(Case, on_delete=models.CASCADE)
+    material_name = models.CharField(max_length=255)
+    material_code = models.CharField(max_length=255, blank=True, null=True)
+    quantity = models.IntegerField()
+    unit_price = models.IntegerField()
+    is_free_text = models.BooleanField()
+    suggestion = models.ForeignKey(Inventory, on_delete=models.CASCADE, blank=True, null=True, related_name='suggestion1_order_items')
+    confidence = models.FloatField(blank=True, null=True)
 
-    id = models.AutoField(primary_key=True)
-    activity = models.ForeignKey(Activity, related_name='reworks', on_delete=models.CASCADE)
-    cost = models.IntegerField(default=0)
-    target = models.CharField(max_length=250, default='None')
-    cause = models.CharField(max_length=250, default='None')
 
     def __str__(self):
-        return f"{self.case.id} - {self.value} at {self.timestamp}"
+        """
+        Returns the string representation of the OrderItem instance.
+        """
+        return f'{self.material_name} - {self.quantity}'
