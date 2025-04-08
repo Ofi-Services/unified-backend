@@ -131,7 +131,7 @@ class Command(BaseCommand):
         case_info['user'] = random.choice(NAMES)
         case_info['user_type'] = random.choice(['Manager', 'Agent', 'Analyst'])
         case_info['automatic'] = False
-        case_info['rework'] = False
+        case_info['rework'] = True
 
         case_info['last_timestamp'] +=  timedelta(hours=random.expovariate(1/24))
 
@@ -153,7 +153,7 @@ class Command(BaseCommand):
         case_info['user'] = random.choice(NAMES)
         case_info['user_type'] = random.choice(['Manager', 'Agent', 'Analyst'])
         case_info['automatic'] = False
-        case_info['rework'] = False
+        case_info['rework'] = True
         self.save_activity(case_info, 'Order Approval')
         random_number = random.random()
         if random_number < 0.9:  
@@ -191,7 +191,7 @@ class Command(BaseCommand):
         case_info['user'] = random.choice(NAMES)
         case_info['user_type'] = random.choice(['Manager', 'Agent', 'Analyst'])
         case_info['automatic'] = True
-        case_info['rework'] = False
+        case_info['rework'] = True
 
         case_info['last_timestamp'] +=  timedelta(hours=random.expovariate(1/24))
 
@@ -204,7 +204,7 @@ class Command(BaseCommand):
         case_info['user'] = random.choice(NAMES)
         case_info['user_type'] = random.choice(['Manager', 'Agent', 'Analyst'])
         case_info['automatic'] = True
-        case_info['rework'] = False
+        case_info['rework'] = True
 
         case_info['last_timestamp'] +=  timedelta(hours=random.expovariate(1/24))
 
@@ -216,7 +216,7 @@ class Command(BaseCommand):
         case_info['user'] = random.choice(NAMES)
         case_info['user_type'] = random.choice(['Manager', 'Agent', 'Analyst'])
         case_info['automatic'] = random.choice([True, False])
-        case_info['rework'] = False
+        case_info['rework'] = True
 
         case_info['last_timestamp'] +=  timedelta(hours=random.expovariate(1/24))
 
@@ -235,7 +235,7 @@ class Command(BaseCommand):
         case_info['user'] = random.choice(NAMES)
         case_info['user_type'] = random.choice(['Manager', 'Agent', 'Analyst'])
         case_info['automatic'] = random.choice([True, False])
-        case_info['rework'] = False
+        case_info['rework'] = True
 
         case_info['last_timestamp'] +=  timedelta(hours=random.expovariate(1/24))
 
@@ -247,7 +247,7 @@ class Command(BaseCommand):
         case_info['user'] = random.choice(NAMES)
         case_info['user_type'] = random.choice(['Manager', 'Agent', 'Analyst'])
         case_info['automatic'] = False
-        case_info['rework'] = False
+        case_info['rework'] = True
 
         case_info['last_timestamp'] +=  timedelta(hours=random.expovariate(1/24))
 
@@ -263,7 +263,7 @@ class Command(BaseCommand):
         case_info['user'] = random.choice(NAMES)
         case_info['user_type'] = 'Manager'
         case_info['automatic'] = False
-        case_info['rework'] = False
+        case_info['rework'] = True
 
         case_info['last_timestamp'] +=  timedelta(hours=random.expovariate(1/24))
 
@@ -290,7 +290,7 @@ class Command(BaseCommand):
         case_info['user'] = random.choice(NAMES)
         case_info['user_type'] = random.choice(['Manager', 'Agent', 'Analyst'])
         case_info['automatic'] = True
-        case_info['rework'] = False
+        case_info['rework'] = True
 
         case_info['last_timestamp'] +=  timedelta(hours=random.expovariate(1/24))
 
@@ -299,7 +299,7 @@ class Command(BaseCommand):
         case_info['user'] = random.choice(NAMES)
         case_info['user_type'] = random.choice(['Manager', 'Agent', 'Analyst'])
         case_info['automatic'] = False
-        case_info['rework'] = False
+        case_info['rework'] = True
 
         case_info['last_timestamp'] +=  timedelta(hours=random.expovariate(1/24))
 
@@ -308,7 +308,7 @@ class Command(BaseCommand):
         case_info['user'] = random.choice(NAMES)
         case_info['user_type'] = random.choice(['Manager', 'Agent', 'Analyst'])
         case_info['automatic'] = random.choice([True, False])
-        case_info['rework'] = False
+        case_info['rework'] = True
 
         case_info['last_timestamp'] +=  timedelta(hours=random.expovariate(1/24))
 
@@ -317,7 +317,7 @@ class Command(BaseCommand):
         case_info['user'] = random.choice(NAMES)
         case_info['user_type'] = random.choice(['Manager', 'Agent', 'Analyst'])
         case_info['automatic'] = False
-        case_info['rework'] = False
+        case_info['rework'] = True
 
         case_info['last_timestamp'] +=  timedelta(hours=random.expovariate(1/24))
 
@@ -455,6 +455,33 @@ class Command(BaseCommand):
    
         self.stdout.write(self.style.SUCCESS('Order data added successfully'))
     
+
+    def add_reworks(self):
+        activity_names = [
+            "Order Creation",
+            "Order Approval",
+            "Send to Supplier",
+            "Get Confirmation from Supplier",
+            "Receive Shipment Confirmation from Supplier",
+            "Receive Materials",
+            "Verify Materials",
+            "Accept Materials",
+            "Integrate to Inventory",
+            "Payment",
+            "Order Modification",
+            "Return Materials",
+            "Distribute Materials",
+            "Order Cancellation",
+        ]
+        for case in Case.objects.all():
+            activities = Activity.objects.filter(case=case).order_by('timestamp')
+            for name in activity_names:
+                activity = activities.filter(name=name).first()
+                if activity:
+                    activity.rework = False
+                    activity.save()
+
+
     def create_variants(self, *args, **kwargs):
         """
         Creates and stores variants of activity sequences for cases, along with their statistics.
@@ -684,6 +711,8 @@ class Command(BaseCommand):
 
         self.stdout.write(self.style.SUCCESS('Activities added'))
 
+        self.add_reworks()
+        self.stdout.write(self.style.SUCCESS('Reworks added'))
 
         self.stdout.write(self.style.SUCCESS('Adding time to cases'))
         self.add_time_to_cases()
