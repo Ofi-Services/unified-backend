@@ -43,6 +43,7 @@ class Activity(models.Model):
     user_type = models.CharField(max_length=25, default='None')
     automatic = models.BooleanField(default=False)
     rework = models.BooleanField(default=False)
+    case_index = models.IntegerField(default=0)
 
     def __str__(self):
         return f"{self.case.id} - {self.name} at {self.timestamp}"
