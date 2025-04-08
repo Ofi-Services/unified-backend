@@ -59,6 +59,7 @@ class Command(BaseCommand):
             user_type=case_info['user_type'],
             automatic=case_info['automatic'],
             rework=case_info['rework'],
+            case_index= int(case.id)
         )
         print('ACTIVITY', activity, 'CASE', case_info['case_id'], 'TIMESTAMP', case_info['last_timestamp'])
 
