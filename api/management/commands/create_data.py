@@ -129,8 +129,8 @@ class Command(BaseCommand):
         """
         print('ORDER CREATION', case_info['case_id'])
         case_info['user'] = random.choice(NAMES)
-        case_info['user_type'] = random.choice(['A', 'B', 'C'])
-        case_info['automatic'] = random.choice([True, False])
+        case_info['user_type'] = random.choice(['Manager', 'Agent', 'Analyst'])
+        case_info['automatic'] = False
         case_info['rework'] = False
 
         case_info['last_timestamp'] +=  timedelta(hours=random.expovariate(1/24))
@@ -151,7 +151,9 @@ class Command(BaseCommand):
         case_info['last_timestamp'] +=  timedelta(hours=random.expovariate(1/24))
 
         case_info['user'] = random.choice(NAMES)
-        case_info['user_type'] = random.choice(['A', 'B', 'C'])
+        case_info['user_type'] = random.choice(['Manager', 'Agent', 'Analyst'])
+        case_info['automatic'] = False
+        case_info['rework'] = False
         self.save_activity(case_info, 'Order Approval')
         random_number = random.random()
         if random_number < 0.9:  
@@ -170,7 +172,7 @@ class Command(BaseCommand):
             case_info (dict): A dictionary containing information about the case.
         """
         case_info['user'] = random.choice(NAMES)
-        case_info['user_type'] = random.choice(['A', 'B', 'C'])
+        case_info['user_type'] = random.choice(['Manager', 'Agent', 'Analyst'])
         case_info['automatic'] = random.choice([True, False])
         case_info['rework'] = True
 
@@ -187,8 +189,8 @@ class Command(BaseCommand):
             case_info (dict): A dictionary containing information about the case.
         """
         case_info['user'] = random.choice(NAMES)
-        case_info['user_type'] = random.choice(['A', 'B', 'C'])
-        case_info['automatic'] = random.choice([True, False])
+        case_info['user_type'] = random.choice(['Manager', 'Agent', 'Analyst'])
+        case_info['automatic'] = True
         case_info['rework'] = False
 
         case_info['last_timestamp'] +=  timedelta(hours=random.expovariate(1/24))
@@ -200,8 +202,8 @@ class Command(BaseCommand):
     def send_to_supplier(self, case_info: dict):
 
         case_info['user'] = random.choice(NAMES)
-        case_info['user_type'] = random.choice(['A', 'B', 'C'])
-        case_info['automatic'] = random.choice([True, False])
+        case_info['user_type'] = random.choice(['Manager', 'Agent', 'Analyst'])
+        case_info['automatic'] = True
         case_info['rework'] = False
 
         case_info['last_timestamp'] +=  timedelta(hours=random.expovariate(1/24))
@@ -212,7 +214,7 @@ class Command(BaseCommand):
     
     def get_confirmation(self, case_info: dict):
         case_info['user'] = random.choice(NAMES)
-        case_info['user_type'] = random.choice(['A', 'B', 'C'])
+        case_info['user_type'] = random.choice(['Manager', 'Agent', 'Analyst'])
         case_info['automatic'] = random.choice([True, False])
         case_info['rework'] = False
 
@@ -231,7 +233,7 @@ class Command(BaseCommand):
     
     def receive_shipment_confirmation(self, case_info: dict):
         case_info['user'] = random.choice(NAMES)
-        case_info['user_type'] = random.choice(['A', 'B', 'C'])
+        case_info['user_type'] = random.choice(['Manager', 'Agent', 'Analyst'])
         case_info['automatic'] = random.choice([True, False])
         case_info['rework'] = False
 
@@ -243,8 +245,8 @@ class Command(BaseCommand):
     
     def receive_materials(self, case_info: dict):
         case_info['user'] = random.choice(NAMES)
-        case_info['user_type'] = random.choice(['A', 'B', 'C'])
-        case_info['automatic'] = random.choice([True, False])
+        case_info['user_type'] = random.choice(['Manager', 'Agent', 'Analyst'])
+        case_info['automatic'] = False
         case_info['rework'] = False
 
         case_info['last_timestamp'] +=  timedelta(hours=random.expovariate(1/24))
@@ -259,8 +261,8 @@ class Command(BaseCommand):
 
     def material_inspection(self, case_info: dict):
         case_info['user'] = random.choice(NAMES)
-        case_info['user_type'] = random.choice(['A', 'B', 'C'])
-        case_info['automatic'] = random.choice([True, False])
+        case_info['user_type'] = 'Manager'
+        case_info['automatic'] = False
         case_info['rework'] = False
 
         case_info['last_timestamp'] +=  timedelta(hours=random.expovariate(1/24))
@@ -272,8 +274,8 @@ class Command(BaseCommand):
             self.material_acceptance(case_info)
         elif random_number < 0.95:
             case_info['user'] = random.choice(NAMES)
-            case_info['user_type'] = random.choice(['A', 'B', 'C'])
-            case_info['automatic'] = random.choice([True, False])
+            case_info['user_type'] = 'Manager'
+            case_info['automatic'] = False
             case_info['rework'] = True
 
             case_info['last_timestamp'] +=  timedelta(hours=random.expovariate(1/24))
@@ -286,8 +288,8 @@ class Command(BaseCommand):
     
     def material_acceptance(self, case_info: dict):
         case_info['user'] = random.choice(NAMES)
-        case_info['user_type'] = random.choice(['A', 'B', 'C'])
-        case_info['automatic'] = random.choice([True, False])
+        case_info['user_type'] = random.choice(['Manager', 'Agent', 'Analyst'])
+        case_info['automatic'] = True
         case_info['rework'] = False
 
         case_info['last_timestamp'] +=  timedelta(hours=random.expovariate(1/24))
@@ -295,8 +297,8 @@ class Command(BaseCommand):
         self.save_activity(case_info, 'Accept Materials')
 
         case_info['user'] = random.choice(NAMES)
-        case_info['user_type'] = random.choice(['A', 'B', 'C'])
-        case_info['automatic'] = random.choice([True, False])
+        case_info['user_type'] = random.choice(['Manager', 'Agent', 'Analyst'])
+        case_info['automatic'] = False
         case_info['rework'] = False
 
         case_info['last_timestamp'] +=  timedelta(hours=random.expovariate(1/24))
@@ -304,7 +306,7 @@ class Command(BaseCommand):
         self.save_activity(case_info, 'Integrate to Inventory')
 
         case_info['user'] = random.choice(NAMES)
-        case_info['user_type'] = random.choice(['A', 'B', 'C'])
+        case_info['user_type'] = random.choice(['Manager', 'Agent', 'Analyst'])
         case_info['automatic'] = random.choice([True, False])
         case_info['rework'] = False
 
@@ -313,8 +315,8 @@ class Command(BaseCommand):
         self.save_activity(case_info, 'Payment')
 
         case_info['user'] = random.choice(NAMES)
-        case_info['user_type'] = random.choice(['A', 'B', 'C'])
-        case_info['automatic'] = random.choice([True, False])
+        case_info['user_type'] = random.choice(['Manager', 'Agent', 'Analyst'])
+        case_info['automatic'] = False
         case_info['rework'] = False
 
         case_info['last_timestamp'] +=  timedelta(hours=random.expovariate(1/24))
