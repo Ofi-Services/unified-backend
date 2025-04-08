@@ -50,7 +50,7 @@ class Command(BaseCommand):
         
         #Get the case and create the activity
         case = Case.objects.get(id=case_info['case_id'])
-
+        print('SAVE ACTIVITY', case_info['case_id'], 'ACTIVITY', activity)
         Activity.objects.create(
             case=case,
             timestamp=case_info['last_timestamp'],
@@ -60,6 +60,7 @@ class Command(BaseCommand):
             automatic=case_info['automatic'],
             rework=case_info['rework'],
         )
+        print('ACTIVITY', activity, 'CASE', case_info['case_id'], 'TIMESTAMP', case_info['last_timestamp'])
 
 
     def update_case(self, case_info: dict, activity):
@@ -77,7 +78,7 @@ class Command(BaseCommand):
             Case.DoesNotExist: If no case with the given `case_id` exists in the database.
         """
         case_info['last_timestamp'] +=  timedelta(hours=random.expovariate(1/24))
-
+        print('UPDATE CASE', case_info['case_id'], 'ACTIVITY', activity)
         self.save_activity(case_info, activity)
 
     def start(self, case_id):
@@ -107,6 +108,8 @@ class Command(BaseCommand):
         Returns:
             None
         """
+
+        print('STARTING CASE', case_id)
         case = Case.objects.get(id=case_id)
         case_info = {}
         case_info['case_id'] = case_id
@@ -123,7 +126,7 @@ class Command(BaseCommand):
             initial_timestamp (datetime): The initial timestamp.
             case_type (str): The type of the case.
         """
-
+        print('ORDER CREATION', case_info['case_id'])
         case_info['user'] = random.choice(NAMES)
         case_info['user_type'] = random.choice(['A', 'B', 'C'])
         case_info['automatic'] = random.choice([True, False])
@@ -348,8 +351,7 @@ class Command(BaseCommand):
                     unit_price=unit_price,
                     new_product=False
                 )
-                print(f'INVENTORY','Product Code: {product_code} - Product Name: {product_name}')
-
+               
         self.stdout.write(self.style.SUCCESS('Inventory data added successfully'))
 
 
@@ -411,6 +413,8 @@ class Command(BaseCommand):
                         ft_items = 1
                     else:
                         ft_items = 0
+
+                    self.add_case_ids(id)    
                     order = Case.objects.create(
                             id=id,
                             total_price=total_price,
@@ -426,7 +430,7 @@ class Command(BaseCommand):
                             ft_items=ft_items,
                         )
                     
-                    print(f'ORDER','Order ID: {order_id} - Order Date: {order_date}')
+
                 else:
                     order.total_price += int(total_price)
                     order.number_of_items += 1
@@ -445,8 +449,7 @@ class Command(BaseCommand):
                     suggestion=suggestion,
                     confidence=confidence,
                 )
-                print(f'ORDER ITEM','Material Name: {row["material_name"]} - Quantity: {row["quantity"]}')
-
+   
         self.stdout.write(self.style.SUCCESS('Order data added successfully'))
     
     def create_variants(self, *args, **kwargs):
@@ -668,12 +671,15 @@ class Command(BaseCommand):
         Handle the command to add data to the database from the CSV file.
         """
         self.add_inventory()
-
+        self.stdout.write(self.style.SUCCESS('Inventory Added'))
         self.add_Orders_Items()
-
+        self.stdout.write(self.style.SUCCESS('Order Items added'))
 
         for id in self.cases_ids:
+            print('case -------------', id)
             self.start(id)
+
+        self.stdout.write(self.style.SUCCESS('Activities added'))
 
 
         self.stdout.write(self.style.SUCCESS('Adding time to cases'))
