@@ -6,13 +6,14 @@ from django.conf import settings
 from rapidfuzz import fuzz
 from rapidfuzz.distance import DamerauLevenshtein, JaroWinkler
 import csv
-from api.models import Invoice
+from api.models import Invoice, Case
 from django.utils.dateparse import parse_datetime
 from django.conf import settings
 import os
 from decimal import Decimal
 import random
 from datetime import datetime, timedelta
+from ..constants import ACTIVITY_CHOICES, PATTERN_CHOICES
 
 
 class Command(BaseCommand):
@@ -226,106 +227,35 @@ class Command(BaseCommand):
         else:
             return random.randint(0, 49)
         
-
-    def create_invoices(self, *args, **kwargs):
+    def get_similarity_info()
+    def create_invoice(self, date: datetime, value: int, case: Case):
         """
         Handle the command to add data to the database from the CSV file.
         """
-        # Path to the CSV file
-        csv_file_path = os.path.join(settings.BASE_DIR, 'api', 'data', 'DummyData.csv')
+        item_quantity = random.randint(1, 10)
+        unit_price = value / item_quantity
 
-        # Read the CSV file
-        with open(csv_file_path, newline='') as csvfile:
-            reader = csv.DictReader(csvfile)
-            counter = 0
 
-            for row in reader:
-                duplicate_n = random.randint(1, 5)
-                invoice_ref = 'INV-' + str(counter)
-                date_str = row['Earliest Due Date']
-                if date_str == '':
-                    date = datetime(2025, 1, 1) + timedelta(days=counter + random.randint(1, 100))
-                else:
-                    try:
-                        date = datetime.strptime(date_str, '%m/%d/%Y')
-                    except ValueError:
-                        raise ValueError(f"Invalid date format: {date_str} in row {counter}")
-                quantity = random.randint(1, 12)
-                value = Decimal(row['Group Value'])
-                unit_price = value / quantity
-                vendor = row['Vendor'].split(' - ', 1)[-1]
-                pattern = row['Group Pattern']
-                open_ = random.choice([True, False])
-                group_id = row['Group UUID']
-                confidence = row['Confidence'].strip()
-                region = random.choice(['North', 'South', 'East', 'West'])
-                description = row['Description']
-                payment_method = random.choice(['Credit Card', 'Bank Transfer', 'PayPal', 'Cash'])
-            
-                pay_date = date + timedelta(days=random.randint(15, 30)) if random.choice([True, False]) else None
-                special_instructions = row['Special Intructions']
-                accuracy = self.get_accuracy(confidence, pattern)
-            
-                if 'Open' in row['Group Contains']:
-                    open_ = True
-                else:
-                    open_ = False
-            
-                Invoice.objects.create(
-                    reference=invoice_ref,
-                    date=date,
-                    quantity=quantity,
-                    unit_price=unit_price,
-                    value=value,
-                    vendor=vendor,
-                    pattern=pattern,
-                    open=open_,
-                    group_id=group_id,
-                    confidence=confidence,
-                    region=region,
-                    description=description,
-                    payment_method=payment_method,
-                    pay_date=pay_date,
-                    special_instructions=special_instructions,
-                    accuracy=accuracy
-                )
-            
-                counter += 1
-            
-                # Add duplicate data based on the pattern
-                for i in range(0, duplicate_n):
-                    invoice_ref = 'INV-' + str(counter)
-                    if pattern == 'Similar Value':
-                        value = str(float(value) + random.randint(-30, 30))
-                    elif pattern == 'Similar Vendor':
-                        vendor = self.similar_text(vendor)
-                    elif pattern == 'Similar Date':
-                        date = date + timedelta(days=i)
-                    elif pattern == 'Similar Reference':
-                        invoice_ref = self.similar_text(invoice_ref)
-                    elif pattern == 'Similar Description':
-                        description = self.similar_text(description)
-                    counter += 1
-            
-                    Invoice.objects.create(
-                        reference=invoice_ref,
-                        date=date,
-                        quantity=quantity,
-                        unit_price=unit_price,
-                        value=value,
-                        vendor=vendor,
-                        pattern=pattern,
-                        open=open_,
-                        group_id=group_id,
-                        confidence=confidence,
-                        region=region,
-                        description=description,
-                        payment_method=payment_method,
-                        pay_date=pay_date,
-                        special_instructions=special_instructions,
-                        accuracy=accuracy
-                    )
-        self.stdout.write(self.style.SUCCESS('Data added successfully'))
+        pattern = random.choice(PATTERN_CHOICES)
+        invoice = Invoice(
+            date=date,
+            unit_price=unit_price,
+            quantity=item_quantity,
+            value=value,
+            case=case,
+            pattern=pattern,
+            open=True,
+            group_id=str(random.randint(1, 100)),
+            confidence='High',
+            description='No description',
+            payment_method='Credit Card',
+            pay_date=datetime.now(),
+            special_instructions='No special instructions',
+            accuracy=100
+        )
+        invoice.save()
+        print("Invoice,  ", invoice.id," created successfully.")
+       
     def handle(self, *args, **kwargs):
         """
         Handle the command to calculate the similarity between two invoices.

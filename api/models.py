@@ -151,7 +151,7 @@ class Invoice(models.Model):
         Special_Instructions (str): Any special instructions for the invoice.
         Accuracy (int): The accuracy of the invoice.
     """
-    reference = models.CharField(max_length=50)
+    id = models.AutoField(primary_key=True)
     date = models.DateTimeField(null=True, blank=True)
     unit_price = models.DecimalField(max_digits=10, decimal_places=2)
     quantity = models.IntegerField()
