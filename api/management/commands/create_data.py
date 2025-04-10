@@ -241,8 +241,21 @@ class Command(BaseCommand):
 
         self.save_activity(case_info, 'Receive Shipment Confirmation from Supplier')
 
-        self.receive_materials(case_info)
+        self.receive_invoice(case_info)
     
+
+    def receive_invoice(self, case_info: dict):
+        case_info['user'] = random.choice(NAMES)
+        case_info['user_type'] = random.choice(['Manager', 'Agent', 'Analyst'])
+        case_info['automatic'] = random.choice([True, False])
+        case_info['rework'] = True
+
+        case_info['last_timestamp'] +=  timedelta(hours=random.expovariate(1/24))
+
+        self.save_activity(case_info, 'Receive Invoice')
+
+        self.receive_materials(case_info)
+
     def receive_materials(self, case_info: dict):
         case_info['user'] = random.choice(NAMES)
         case_info['user_type'] = random.choice(['Manager', 'Agent', 'Analyst'])
@@ -472,6 +485,7 @@ class Command(BaseCommand):
             "Return Materials",
             "Distribute Materials",
             "Order Cancellation",
+            "Receive Invoice",
         ]
         for case in Case.objects.all():
             activities = Activity.objects.filter(case=case).order_by('timestamp')
