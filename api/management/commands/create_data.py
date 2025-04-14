@@ -10,6 +10,9 @@ from datetime import timedelta
 from ..constants import NAMES, BRANCHES, SUPPLIERS
 import json
 from django.utils import timezone
+from ..utils.duplicate_utils import create_invoice
+
+
 
 class Command(BaseCommand):
     """
@@ -252,7 +255,10 @@ class Command(BaseCommand):
 
         case_info['last_timestamp'] +=  timedelta(hours=random.expovariate(1/24))
 
+        case = Case.objects.get(id=case_info['case_id'])
         self.save_activity(case_info, 'Receive Invoice')
+
+        create_invoice(date = case_info['last_timestamp'], value = case.total_price, case = case)
 
         self.receive_materials(case_info)
 

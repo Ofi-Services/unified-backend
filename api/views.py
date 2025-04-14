@@ -1,8 +1,8 @@
 from rest_framework import generics
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from .models import Case, Activity, Variant, Inventory, OrderItem
-from .serializers import CaseSerializer, ActivitySerializer, VariantSerializer
+from .models import Case, Activity, Variant, Inventory, OrderItem, Invoice
+from .serializers import CaseSerializer, ActivitySerializer, VariantSerializer, InvoiceSerializer
 from rest_framework.pagination import PageNumberPagination
 from datetime import datetime
 
@@ -265,8 +265,7 @@ class KPIList(APIView):
                 return Response({'error': 'Invalid date format. Use YYYY-MM-DD.'}, status=400)
 
             variants = Variant.objects.all()
-            bills = Bill.objects.all()
-            reworks = Rework.objects.all()
+
             activities = Activity.objects.all()
 
             if startdate:
@@ -299,3 +298,37 @@ class KPIList(APIView):
             )
         except Exception as e:
             return Response({'error': str(e)}, status=500)
+
+class InvoiceList(APIView):
+    """
+    API view to retrieve a list of invoices with optional filtering and pagination.
+    Methods:
+        get(request, format=None):
+            Handles GET requests to retrieve and paginate the list of invoices.
+    Query Parameters:
+        - case (list[str]): List of case IDs to filter invoices (optional).
+        - page_size (int): Number of invoices per page (default: 100000).
+        - A paginated response containing the serialized list of invoices.
+    """
+    def get(self, request, format=None):
+        """
+        Handle GET request to list invoices with optional filtering and pagination.
+
+        Args:
+            request: The HTTP request object.
+            format: The format of the response.
+
+        Returns:
+            Response: The paginated list of invoices.
+        """
+        case_ids = request.query_params.getlist('case')
+        page_size = request.query_params.get('page_size', 100000)  # Default page size is 10 if not provided
+        invoices = Invoice.objects.all()
+        if case_ids:
+            invoices = invoices.filter(case__id__in=case_ids)
+            
+        paginator = PageNumberPagination()
+        paginator.page_size = page_size
+        paginated_invoices = paginator.paginate_queryset(invoices, request)
+        serializer = InvoiceSerializer(paginated_invoices, many=True)
+        return paginator.get_paginated_response(serializer.data)

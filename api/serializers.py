@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Case, Activity, Variant, Inventory, OrderItem
+from .models import Case, Activity, Variant, Inventory, OrderItem, Invoice
 
 class CaseSerializer(serializers.ModelSerializer):
     """
@@ -79,4 +79,23 @@ class OrderItemSerializer(serializers.ModelSerializer):
     """
     class Meta:
         model = OrderItem
+        fields = '__all__'
+
+class InvoiceSerializer(serializers.ModelSerializer):
+    """
+    Serializer for the Invoice model.
+    This serializer converts Invoice model instances into JSON format and vice versa.
+    It includes the following fields:
+    - id: The unique identifier for the invoice.
+    - date: The date of the invoice.
+    - unit_price: The unit price of the invoice item.
+    - quantity: The quantity of the invoice item.
+    - value: The total value of the invoice item.
+    - case: The case associated with the invoice item.
+    - pattern: The pattern associated with the invoice item.
+    - open: Indicates if the invoice is open or closed.
+    - group_id: The group identifier for the invoice item.
+    """
+    class Meta:
+        model = Invoice
         fields = '__all__'

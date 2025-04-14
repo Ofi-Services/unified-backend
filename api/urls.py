@@ -20,5 +20,6 @@ urlpatterns = [
     path('meta-data/', views.DistinctActivityData.as_view(), name='distinct-activity-data'),
     path('variant/', views.VariantList.as_view(), name='variant-list'),
     path('KPI/', views.KPIList.as_view(), name='KPI-list'),
+    path('invoice/', views.InvoiceList.as_view(), name='invoice-list'),
     
 ]
