@@ -143,26 +143,12 @@ class DistinctActivityData(APIView):
         try:
             distinct_names = list(Activity.objects.values_list('name', flat=True).distinct())
             distinct_cases = list(Activity.objects.values_list('case', flat=True).distinct())
-            distinct_types = list(Case.objects.values_list('type', flat=True).distinct())
-            distinct_branches = list(Case.objects.values_list('branch', flat=True).distinct())
-            distinct_ramos = list(Case.objects.values_list('ramo', flat=True).distinct())
-            distinct_brockers = list(Case.objects.values_list('brocker', flat=True).distinct())
-            distinct_clients = list(Case.objects.values_list('client', flat=True).distinct())
-            distinct_creators = list(Case.objects.values_list('creator', flat=True).distinct())
+           
 
             attributes = [
                 {'name': 'case', 'type': 'number', 'distincts': distinct_cases},
                 {'name': 'timestamp', 'type': 'date', 'distincts': []},  # Assuming no distinct values for timestamp
                 {'name': 'name', 'type': 'str', 'distincts': distinct_names},
-                {'name': 'tpt', 'type': 'number', 'distincts': []},  # Assuming no distinct values for tpt
-                {'name': 'type', 'type': 'str', 'distincts': distinct_types},
-                {'name': 'branch', 'type': 'str', 'distincts': distinct_branches},
-                {'name': 'ramo', 'type': 'str', 'distincts': distinct_ramos},
-                {'name': 'brocker', 'type': 'str', 'distincts': distinct_brockers},
-                {'name': 'state', 'type': 'str', 'distincts': []},  # Assuming no distinct values for state
-                {'name': 'client', 'type': 'str', 'distincts': distinct_clients},
-                {'name': 'creator', 'type': 'str', 'distincts': distinct_creators},
-                {'name': 'value', 'type': 'number', 'distincts': []}  # Assuming no distinct values for
             ]
 
             return Response({
@@ -270,18 +256,12 @@ class KPIList(APIView):
             activities = Activity.objects.all()
 
             if startdate:
-                bills = bills.filter(timestamp__gte=startdate)
-                reworks = reworks.filter(activity__timestamp__gte=startdate)
                 activities = activities.filter(timestamp__gte=startdate)
             if enddate:
-                bills = bills.filter(timestamp__lte=enddate)
-                reworks = reworks.filter(activity__timestamp__lte=enddate)
                 activities = activities.filter(timestamp__lte=enddate)
 
             case_quantity = activities.values("case").distinct().count()
             variant_quantity = variants.count()
-            bill_quantity = bills.count()
-            rework_quantity = reworks.count()
             approved_cases = Case.objects.filter(id__in=activities.values("case").distinct(), approved=True).count()
             cancelled_by_company = activities.filter(case__activities__name="Declinar solicitud en suscripcion").values("case").distinct().count()
             cancelled_by_broker = case_quantity - approved_cases - cancelled_by_company
@@ -290,8 +270,6 @@ class KPIList(APIView):
                 {
                     "case_quantity": case_quantity,
                     "variant_quantity": variant_quantity,
-                    "bill_quantity": bill_quantity,
-                    "rework_quantity": rework_quantity,
                     "approved_cases": approved_cases,
                     "cancelled_by_company": cancelled_by_company,
                     "cancelled_by_broker": cancelled_by_broker
