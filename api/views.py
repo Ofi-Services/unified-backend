@@ -2,9 +2,10 @@ from rest_framework import generics
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from .models import Case, Activity, Variant, Inventory, OrderItem, Invoice
-from .serializers import CaseSerializer, ActivitySerializer, VariantSerializer, InvoiceSerializer
+from .serializers import CaseSerializer, ActivitySerializer, VariantSerializer, InvoiceSerializer, InventorySerializer
 from rest_framework.pagination import PageNumberPagination
 from datetime import datetime
+from django.db.models import Sum
 
 
 
@@ -331,4 +332,131 @@ class InvoiceList(APIView):
         paginator.page_size = page_size
         paginated_invoices = paginator.paginate_queryset(invoices, request)
         serializer = InvoiceSerializer(paginated_invoices, many=True)
+        return paginator.get_paginated_response(serializer.data)
+    
+
+
+class GroupList(APIView):
+    """
+    API view to retrieve a paginated list of invoice groups with aggregated data.
+    Methods:
+        get(request, format=None):
+            Handles GET requests to retrieve a list of invoice groups with their
+            aggregated data, including overpaid amount, item count, date, region,
+            pattern, open status, confidence, and serialized invoice items.
+    Attributes:
+        None
+    GET Parameters:
+        - page_size (int, optional): The number of groups to display per page. Defaults to 20.
+    Aggregated Data for Each Group:
+        - group_id (int): The unique identifier of the group.
+        - amount_overpaid (float): The total overpaid amount for the group, calculated
+          as the sum of invoice values minus the value of the first invoice in the group.
+        - itemCount (int): The total number of invoices in the group.
+        - date (datetime): The date of the earliest invoice in the group.
+        - region (str): The region of the first invoice in the group.
+        - pattern (str): The pattern associated with the first invoice in the group.
+        - open (bool): The open status of the first invoice in the group.
+        - confidence (float): The confidence level of the first invoice in the group.
+        - items (list): A serialized list of all invoices in the group.
+    Returns:
+        Response: A paginated response containing the aggregated group data or an error message
+        with a 500 status code in case of an exception.
+    Exceptions:
+        - Handles any exceptions during processing and returns a 500 status code with an error message.
+    """
+    def get(self, request, format=None):
+        try:
+            group_list = Invoice.objects.values_list('group_id', flat=True).distinct()
+            group_data = []
+
+            for group_id in group_list:
+                group_invoices = Invoice.objects.filter(group_id=group_id)
+                group_value = group_invoices.aggregate(Sum('value'))['value__sum']
+                first_invoice_value = group_invoices.first().value if group_invoices.exists() else 0
+                group_value -= first_invoice_value
+                group_invoices_count = group_invoices.count()
+                serialized_invoices = InvoiceSerializer(group_invoices, many=True).data
+
+                group_data.append({
+                    'group_id': group_id,
+                    'amount_overpaid': group_value,
+                    'itemCount': group_invoices_count,
+                    'date': group_invoices.order_by('date').first().date if group_invoices.exists() else None,
+                    'pattern': group_invoices.first().pattern if group_invoices.exists() else None,
+                    'open': group_invoices.first().open if group_invoices.exists() else None,
+                    'confidence': group_invoices.first().confidence if group_invoices.exists() else None,
+                    'items': serialized_invoices,
+                })
+
+            paginator = PageNumberPagination()
+            page_size = request.query_params.get('page_size', paginator.page_size)
+            if not page_size:
+                page_size = 20
+            paginator.page_size = page_size
+            paginated_group_data = paginator.paginate_queryset(group_data, request)
+            return paginator.get_paginated_response(paginated_group_data)
+
+        except Exception as e:
+            print(f"Error processing request: {e}")
+            return Response({"error": str(e)}, status=500)
+        
+class InventoryList(APIView):
+    """
+    API view to retrieve a list of inventory items with optional filtering and pagination.
+    Methods:
+        get(request, format=None):
+            Handles GET requests to retrieve and paginate the list of inventory items.
+    Query Parameters:
+        - page_size (int): Number of inventory items per page (default: 100000).
+        - A paginated response containing the serialized list of inventory items.
+    """
+    def get(self, request, format=None):
+        """
+        Handle GET request to list inventory items with optional filtering and pagination.
+
+        Args:
+            request: The HTTP request object.
+            format: The format of the response.
+
+        Returns:
+            Response: The paginated list of inventory items.
+        """
+        page_size = request.query_params.get('page_size', 100000)  # Default page size is 10 if not provided
+        inventories = Inventory.objects.all()
+        
+        paginator = PageNumberPagination()
+        paginator.page_size = page_size
+        paginated_inventories = paginator.paginate_queryset(inventories, request)
+        serializer = InventorySerializer(paginated_inventories, many=True)
+        return paginator.get_paginated_response(serializer.data)
+
+class CaseList(APIView):
+    """
+    API view to retrieve a list of cases with optional filtering and pagination.
+    Methods:
+        get(request, format=None):
+            Handles GET requests to retrieve and paginate the list of cases.
+    Query Parameters:
+        - page_size (int): Number of cases per page (default: 100000).
+        - A paginated response containing the serialized list of cases.
+    """
+    def get(self, request, format=None):
+        """
+        Handle GET request to list cases with optional filtering and pagination.
+
+        Args:
+            request: The HTTP request object.
+            format: The format of the response.
+
+        Returns:
+            Response: The paginated list of cases.
+        """
+        page_size = request.query_params.get('page_size', 100000)  # Default page size is 10 if not provided
+        cases = Case.objects.all()
+        
+        paginator = PageNumberPagination()
+        paginator.page_size = page_size
+        paginated_cases = paginator.paginate_queryset(cases, request)
+        serializer = CaseSerializer(paginated_cases, many=True)
         return paginator.get_paginated_response(serializer.data)

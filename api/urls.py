@@ -21,5 +21,9 @@ urlpatterns = [
     path('variant/', views.VariantList.as_view(), name='variant-list'),
     path('KPI/', views.KPIList.as_view(), name='KPI-list'),
     path('invoice/', views.InvoiceList.as_view(), name='invoice-list'),
+    path('group/', views.GroupList.as_view(), name='group-list'),
+    path('case/', views.CaseList.as_view(), name='case-list'),
+    path('inventory/', views.InventoryList.as_view(), name='inventory'),
+
     
 ]

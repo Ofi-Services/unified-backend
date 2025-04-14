@@ -1,6 +1,8 @@
 from rest_framework import serializers
 from .models import Case, Activity, Variant, Inventory, OrderItem, Invoice
 
+
+
 class CaseSerializer(serializers.ModelSerializer):
     """
     Serializer for the Case model.
@@ -99,3 +101,19 @@ class InvoiceSerializer(serializers.ModelSerializer):
     class Meta:
         model = Invoice
         fields = '__all__'
+
+class InventorySerializer(serializers.ModelSerializer):
+    """
+    Serializer for the Inventory model.
+    This serializer converts Inventory model instances into JSON format and vice versa.
+    It includes the following fields:
+    - id: The unique identifier for the inventory item.
+    - product_code: The code identifying the product.
+    - product_name: The name of the product.
+    - current_stock: The current stock level of the product.
+    - unit_price: The price per unit of the product.
+    """
+    class Meta:
+        model = Inventory
+        fields = '__all__'
+
