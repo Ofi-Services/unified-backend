@@ -262,17 +262,10 @@ class KPIList(APIView):
 
             case_quantity = activities.values("case").distinct().count()
             variant_quantity = variants.count()
-            approved_cases = Case.objects.filter(id__in=activities.values("case").distinct(), approved=True).count()
-            cancelled_by_company = activities.filter(case__activities__name="Declinar solicitud en suscripcion").values("case").distinct().count()
-            cancelled_by_broker = case_quantity - approved_cases - cancelled_by_company
-
             return Response(
                 {
                     "case_quantity": case_quantity,
                     "variant_quantity": variant_quantity,
-                    "approved_cases": approved_cases,
-                    "cancelled_by_company": cancelled_by_company,
-                    "cancelled_by_broker": cancelled_by_broker
                 }
             )
         except Exception as e:

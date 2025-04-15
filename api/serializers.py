@@ -29,9 +29,11 @@ class ActivitySerializer(serializers.ModelSerializer):
         model (Activity): The model to be serialized.
         fields (list): The fields of the model to be serialized.
     """
+    case = CaseSerializer()
+
     class Meta:
         model = Activity
-        fields =  '__all__'	
+        fields = '__all__'
 
 class VariantSerializer(serializers.ModelSerializer):
     """

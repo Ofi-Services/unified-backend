@@ -42,13 +42,7 @@ class Command(BaseCommand):
 
 
     def save_activity(self, case_info: dict, activity):
-        """
-        Write the data to the CSV file.
 
-        Args:
-            case (Case): The Case object.
-            activity (str): The activity name.
-        """
 
         
         #Get the case and create the activity
