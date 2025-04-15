@@ -16,9 +16,12 @@ Endpoints:
 from . import views
 
 urlpatterns = [
-    path("activity-list/", views.ActivityList.as_view(), name="activity-list"),
-    path('meta-data/', views.DistinctActivityData.as_view(), name='distinct-activity-data'),
-    path('variants/', views.VariantList.as_view(), name='variant-list'),
-    path('KPI/', views.KPIList.as_view(), name='KPI-list'),
-    
+    path("activity/", views.ActivityList.as_view(), name="activity-list"),
+    path('metadata/', views.DistinctActivityData.as_view(), name='distinct-activity-data'),
+    path('variant/', views.VariantList.as_view(), name='variant-list'),
+    path('kpi/', views.KPIList.as_view(), name='KPI-list'),
+    path('invoice/', views.InvoiceList.as_view(), name='invoice-list'),
+    path('group/', views.GroupList.as_view(), name='group-list'),
+    path('case/', views.CaseList.as_view(), name='case-list'),
+    path('inventory/', views.InventoryList.as_view(), name='inventory'),
 ]

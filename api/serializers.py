@@ -1,5 +1,7 @@
 from rest_framework import serializers
-from .models import Case, Activity, Variant, Inventory, OrderItem
+from .models import Case, Activity, Variant, Inventory, OrderItem, Invoice
+
+
 
 class CaseSerializer(serializers.ModelSerializer):
     """
@@ -27,9 +29,11 @@ class ActivitySerializer(serializers.ModelSerializer):
         model (Activity): The model to be serialized.
         fields (list): The fields of the model to be serialized.
     """
+    case = CaseSerializer()
+
     class Meta:
         model = Activity
-        fields =  '__all__'	
+        fields = '__all__'
 
 class VariantSerializer(serializers.ModelSerializer):
     """
@@ -80,3 +84,38 @@ class OrderItemSerializer(serializers.ModelSerializer):
     class Meta:
         model = OrderItem
         fields = '__all__'
+
+class InvoiceSerializer(serializers.ModelSerializer):
+    """
+    Serializer for the Invoice model.
+    This serializer converts Invoice model instances into JSON format and vice versa.
+    It includes the following fields:
+    - id: The unique identifier for the invoice.
+    - date: The date of the invoice.
+    - unit_price: The unit price of the invoice item.
+    - quantity: The quantity of the invoice item.
+    - value: The total value of the invoice item.
+    - case: The case associated with the invoice item.
+    - pattern: The pattern associated with the invoice item.
+    - open: Indicates if the invoice is open or closed.
+    - group_id: The group identifier for the invoice item.
+    """
+    class Meta:
+        model = Invoice
+        fields = '__all__'
+
+class InventorySerializer(serializers.ModelSerializer):
+    """
+    Serializer for the Inventory model.
+    This serializer converts Inventory model instances into JSON format and vice versa.
+    It includes the following fields:
+    - id: The unique identifier for the inventory item.
+    - product_code: The code identifying the product.
+    - product_name: The name of the product.
+    - current_stock: The current stock level of the product.
+    - unit_price: The price per unit of the product.
+    """
+    class Meta:
+        model = Inventory
+        fields = '__all__'
+

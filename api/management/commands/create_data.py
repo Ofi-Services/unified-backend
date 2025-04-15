@@ -10,6 +10,9 @@ from datetime import timedelta
 from ..constants import NAMES, BRANCHES, SUPPLIERS
 import json
 from django.utils import timezone
+from ..utils.duplicate_utils import create_invoice
+
+
 
 class Command(BaseCommand):
     """
@@ -39,13 +42,7 @@ class Command(BaseCommand):
 
 
     def save_activity(self, case_info: dict, activity):
-        """
-        Write the data to the CSV file.
 
-        Args:
-            case (Case): The Case object.
-            activity (str): The activity name.
-        """
 
         
         #Get the case and create the activity
@@ -241,8 +238,24 @@ class Command(BaseCommand):
 
         self.save_activity(case_info, 'Receive Shipment Confirmation from Supplier')
 
-        self.receive_materials(case_info)
+        self.receive_invoice(case_info)
     
+
+    def receive_invoice(self, case_info: dict):
+        case_info['user'] = random.choice(NAMES)
+        case_info['user_type'] = random.choice(['Manager', 'Agent', 'Analyst'])
+        case_info['automatic'] = random.choice([True, False])
+        case_info['rework'] = True
+
+        case_info['last_timestamp'] +=  timedelta(hours=random.expovariate(1/24))
+
+        case = Case.objects.get(id=case_info['case_id'])
+        self.save_activity(case_info, 'Receive Invoice')
+
+        create_invoice(date = case_info['last_timestamp'], value = case.total_price, case = case)
+
+        self.receive_materials(case_info)
+
     def receive_materials(self, case_info: dict):
         case_info['user'] = random.choice(NAMES)
         case_info['user_type'] = random.choice(['Manager', 'Agent', 'Analyst'])
@@ -472,6 +485,7 @@ class Command(BaseCommand):
             "Return Materials",
             "Distribute Materials",
             "Order Cancellation",
+            "Receive Invoice",
         ]
         for case in Case.objects.all():
             activities = Activity.objects.filter(case=case).order_by('timestamp')
