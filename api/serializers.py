@@ -70,20 +70,20 @@ class InventorySerializer(serializers.ModelSerializer):
 class OrderItemSerializer(serializers.ModelSerializer):
     """
     Serializer for the OrderItem model.
-    This serializer converts OrderItem model instances into JSON format and vice versa.
-    It includes the following fields:
-    - id: The unique identifier for the order item.
-    - order: The order associated with the order item.
-    - material: The material associated with the order item.
-    - quantity: The quantity of the material in the order item.
-    - unit_price: The unit price of the material in the order item.
-    - total_price: The total price of the order item.
-    - suggestion: The suggested inventory item for the order item.
-    - confidence: The confidence level of the suggestion.
+
+    Converts OrderItem model instances to native Python datatypes that can be easily rendered into JSON, XML, or other content types.
+
+    Meta:
+        model (OrderItem): The model that is being serialized.
+        fields (list): The list of fields to be included in the serialized output.
     """
+
+    #add order serializer
+    order = CaseSerializer()
+    suggestion = InventorySerializer()
     class Meta:
         model = OrderItem
-        fields = '__all__'
+        fields = ['order', 'material_name', 'material_code', 'quantity', 'unit_price', 'is_free_text', 'suggestion', 'confidence']
 
 class InvoiceSerializer(serializers.ModelSerializer):
     """

@@ -2,7 +2,7 @@ from rest_framework import generics
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from .models import Case, Activity, Variant, Inventory, OrderItem, Invoice
-from .serializers import CaseSerializer, ActivitySerializer, VariantSerializer, InvoiceSerializer, InventorySerializer
+from .serializers import CaseSerializer, ActivitySerializer, VariantSerializer, InvoiceSerializer, InventorySerializer, OrderItemSerializer
 from rest_framework.pagination import PageNumberPagination
 from datetime import datetime
 from django.db.models import Sum
@@ -431,3 +431,34 @@ class CaseList(APIView):
         paginated_cases = paginator.paginate_queryset(cases, request)
         serializer = CaseSerializer(paginated_cases, many=True)
         return paginator.get_paginated_response(serializer.data)
+    
+
+class OrderItemList(APIView):
+    """
+    API view to list the order items with optional filtering and pagination.
+    This view handles GET requests to retrieve a list of order items.
+    Methods:
+        get(request, format=None):
+    GET Method:
+    """
+
+
+    def get(self, request, format=None):
+        """
+        Handles GET requests to retrieve a list of order items.
+
+        Query Parameters:
+            material_code (list of str): List of material codes to filter order items.
+
+        Returns:
+            Response: Paginated response with serialized order item data.
+        """
+
+        # Filter order items by material code
+        order_items = OrderItem.objects.all()
+
+        paginator = PageNumberPagination()
+        paginated_order_items = paginator.paginate_queryset(order_items, request)
+        serializer = OrderItemSerializer(paginated_order_items, many=True)
+        return paginator.get_paginated_response(serializer.data)
+    
