@@ -57,7 +57,7 @@ class ActivityList(APIView):
             case_ids = request.query_params.getlist('case')
             names = request.query_params.getlist('name')
             case_index = request.query_params.get('case_index')
-            page_size = request.query_params.get('page_size', 100000)
+            page_size = request.query_params.get('page_size', 50)
             type = request.query_params.get('type')
             branch = request.query_params.get('branch')
             ramo = request.query_params.get('ramo')
@@ -192,7 +192,7 @@ class VariantList(APIView):
             Response: The paginated list of variants.
         """
         activities_param = request.query_params.getlist('activities')
-        page_size = request.query_params.get('page_size', 100000)  # Default page size is 10 if not provided
+        page_size = request.query_params.get('page_size', 50)  # Default page size is 10 if not provided
         variants = Variant.objects.all()
         if activities_param:
             for param in activities_param:
@@ -294,7 +294,7 @@ class InvoiceList(APIView):
             Response: The paginated list of invoices.
         """
         case_ids = request.query_params.getlist('case')
-        page_size = request.query_params.get('page_size', 100000)  # Default page size is 10 if not provided
+        page_size = request.query_params.get('page_size', 50)  # Default page size is 10 if not provided
         invoices = Invoice.objects.all()
         if case_ids:
             invoices = invoices.filter(case__id__in=case_ids)
@@ -363,7 +363,7 @@ class GroupList(APIView):
             paginator = PageNumberPagination()
             page_size = request.query_params.get('page_size', paginator.page_size)
             if not page_size:
-                page_size = 20
+                page_size = 50
             paginator.page_size = page_size
             paginated_group_data = paginator.paginate_queryset(group_data, request)
             return paginator.get_paginated_response(paginated_group_data)
@@ -393,7 +393,7 @@ class InventoryList(APIView):
         Returns:
             Response: The paginated list of inventory items.
         """
-        page_size = request.query_params.get('page_size', 100000)  # Default page size is 10 if not provided
+        page_size = request.query_params.get('page_size', 50)  # Default page size is 10 if not provided
         inventories = Inventory.objects.all()
         
         paginator = PageNumberPagination()
